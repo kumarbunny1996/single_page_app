@@ -4,6 +4,7 @@ var searchInput;
 var successMsg;
 var errorMsg;
 
+
 //this gets content from file
 function getContent(fragmentId, callback) {
 
@@ -293,12 +294,18 @@ function infoFriends() {
     document.body.appendChild(noFriendsDiv);
 }
 
-//filter the data with searchInput
-function filterFriendsData(dataList) {
+function searchFilter(dataList) {
     let friendsData = dataList.filter(friendData => {
         let friendName = friendData.name.substr(0, 3);
         return friendName === searchInput;
     });
+    return friendsData;
+}
+
+//filter the data with searchInput
+function filterFriendsData(dataList) {
+    let friendsData = searchFilter(dataList);
+
     if (friendsData.length === 0) {
         while (document.querySelector('.no-friends')) {
             const noFriendsDiv = document.querySelector('.no-friends');
@@ -703,6 +710,7 @@ const closeForm = function(e) {
 //search event handler function
 const searchFriend = function(e) {
         e.preventDefault();
+        e.stopPropagation();
         console.log(e.target);
         searchInput = document.querySelector('#search').value.toLowerCase().substr(0, 3);
 
@@ -770,21 +778,29 @@ function clearElement() {
 
 }
 //clear search event handler
-const clearSearchHistory = function(e) {
-    console.log(e.target);
+const clearSearchHistory = function() {
+    // console.log(e.target);
     if (!searchInput) return;
-    if (searchInput) {
-        Store.getData().then(dataList => {
-            dataList.forEach(friendData => {
-                UI.friendsDOM(friendData);
+    Store.getData().then(dataList => {
+        if (searchInput) {
+            let friendsData = searchFilter(dataList);
+            //search data of friends and  removing the dom of  search of friends
+            friendsData.forEach(friendData => {
+                const container = document.querySelector('.grid-container');
+                const user = document.getElementById(friendData._id);
+                container.removeChild(user);
             });
-            searchInput = "";
             const clearDiv = document.querySelector('.clearDiv');
             document.body.removeChild(clearDiv);
+            searchInput = "";
+        }
+        dataList.forEach(friendData => {
+            UI.friendsDOM(friendData);
         });
-    }
 
+    });
 }
+
 
 //event handler for addPage
 

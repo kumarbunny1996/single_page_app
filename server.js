@@ -24,6 +24,7 @@ app.use(bodyParser.json());
 
 
 //adding the static folder to server
+app.use(express.static(__dirname));
 app.use(express.static('public'));
 
 //allowing the static folder to access the dependencies in node modules
