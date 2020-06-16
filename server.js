@@ -86,7 +86,7 @@ app.post('/api/add', (req, res) => {
                         group
                     });
                     newFriend.save().then(myFriend => {
-                        let msg = 'your friend is successfully added';
+                        let msg = 'successfully added';
                         res.status(200).json({ ok, myFriend, msg })
                     }).catch(error => {
                         console.log(error);
@@ -105,7 +105,7 @@ app.delete('/api/friends/:_id', (req, res) => {
     Friend.deleteOne(query)
         .then((result) => {
 
-            let message = 'your friend is successfully removed';
+            let message = 'successfully removed';
 
             res.status(200).json({ result, message });
         })
@@ -149,25 +149,45 @@ app.put('/api/friends/:_id', (req, res) => {
                             useFindAndModify: false
                         })
                         .then(friend => {
-                            let successMsg = "your friend is successfully updated";
+                            let successMsg = "successfully updated";
                             res.json({ friend, successMsg });
                         }).catch(e => {
                             console.log(e);
-                            let msg = 'sorry! failed to update your friend';
+                            let msg = 'sorry! failed to update';
                             res.status(400).json(msg);
                         });
 
                 } else {
-                    errors.push({
-                        message: 'your friend is already exists'
-                    });
-                    res.json({ errors });
+                    //checking the same email id
+                    Friend.findOne({
+                            email: email
+                        })
+                        .then(myFriend => {
+                            if (myFriend) {
+                                errors.push({ message: 'your friend is already exists' });
+                                res.json({ errors });
+                            } else {
+                                Friend.findOneAndUpdate(query, update, {
+                                        new: true,
+                                        useFindAndModify: false
+                                    })
+                                    .then(friend => {
+                                        let successMsg = "successfully updated";
+                                        res.json({
+                                            friend,
+                                            successMsg
+                                        });
+                                    }).catch(e => {
+                                        console.log(e);
+                                        let msg = 'sorry! failed to update';
+                                        res.status(400).json(msg);
+                                    });
+                            }
+                        });
                 }
             });
     }
-});
-
-//search api
+}); //search api
 // app.get('/api/search/:name', (req, res) => {
 //     let name = req.params.name;
 //     let query = { name: name };
